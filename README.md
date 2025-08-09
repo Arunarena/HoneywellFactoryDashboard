@@ -1,6 +1,6 @@
 # Honeywell Factory Dashboard (Regenerated)
 
-This is a sample ASP.NET Core MVC project demonstrating a factory dashboard with:
+This is an ASP.NET Core MVC project demonstrating a factory dashboard with:
 - Real-time machine output charts
 - Live production trend chart
 - Alerts on idle machines
