@@ -1,0 +1,22 @@
+@model IEnumerable<HoneywellFactoryDashboard.Models.ProductionReport>
+
+<h2>Production Reports</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var r in Model)
+        {
+            <tr>
+                <td>@r.ProductName</td>
+                <td>@r.QuantityProduced</td>
+                <td>@r.ReportDate.ToShortDateString()</td>
+            </tr>
+        }
+    </tbody>
+</table>

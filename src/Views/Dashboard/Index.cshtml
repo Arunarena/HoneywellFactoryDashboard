@@ -1,0 +1,138 @@
+@model IEnumerable<HoneywellFactoryDashboard.Models.MachineStatus>
+
+<h2 class="mb-4">Factory Dashboard</h2>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <canvas id="outputChart"></canvas>
+    </div>
+    <div class="col-md-6">
+        <canvas id="trendChart"></canvas>
+    </div>
+</div>
+
+<table class="table table-striped" id="machineTable">
+    <thead>
+        <tr>
+            <th>Machine Name</th>
+            <th>Status</th>
+            <th>Output/Hour</th>
+            <th>Last Updated</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var m in Model)
+        {
+            <tr>
+                <td>@m.MachineName</td>
+                <td>
+                    <span class="badge @(m.Status == "Idle" ? "bg-danger" : "bg-success")">
+                        @m.Status
+                    </span>
+                </td>
+                <td>@m.OutputPerHour</td>
+                <td>@m.LastUpdated</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div id="alertBox" class="alert alert-warning mt-3" style="display:none;"></div>
+
+@section Scripts {
+<script>
+    let outputChart, trendChart;
+
+    function renderOutputChart(data) {
+        const ctx = document.getElementById('outputChart').getContext('2d');
+        const labels = data.map(m => m.machineName);
+        const values = data.map(m => m.outputPerHour);
+
+        if (outputChart) {
+            outputChart.data.labels = labels;
+            outputChart.data.datasets[0].data = values;
+            outputChart.update();
+        } else {
+            outputChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Output per Hour',
+                        data: values,
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+    }
+
+    function renderTrendChart(trend) {
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        const labels = trend.map(t => t.time);
+        const values = trend.map(t => t.output);
+
+        if (trendChart) {
+            trendChart.data.labels = labels;
+            trendChart.data.datasets[0].data = values;
+            trendChart.update();
+        } else {
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Production Output',
+                        data: values,
+                        borderColor: 'rgba(255, 99, 132, 0.9)',
+                        fill: false
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+    }
+
+    function refreshData() {
+        $.getJSON('/Dashboard/GetLiveData', function (data) {
+            renderOutputChart(data);
+
+            const tableBody = $("#machineTable tbody");
+            tableBody.empty();
+            let alertMessages = [];
+
+            data.forEach(m => {
+                const statusBadge = m.status === "Idle" ? "bg-danger" : "bg-success";
+                tableBody.append(`
+                    <tr>
+                        <td>${m.machineName}</td>
+                        <td><span class="badge ${statusBadge}">${m.status}</span></td>
+                        <td>${m.outputPerHour}</td>
+                        <td>${new Date(m.lastUpdated).toLocaleString()}</td>
+                    </tr>
+                `);
+
+                if (m.status === "Idle" || m.outputPerHour === 0) {
+                    alertMessages.push(`⚠ Machine ${m.machineName} is not producing!`);
+                }
+            });
+
+            if (alertMessages.length > 0) {
+                $("#alertBox").html(alertMessages.join("<br>")).show();
+            } else {
+                $("#alertBox").hide();
+            }
+        });
+
+        $.getJSON('/Dashboard/GetTrendData', function (trend) {
+            renderTrendChart(trend);
+        });
+    }
+
+    $(document).ready(function () {
+        refreshData();
+        setInterval(refreshData, 5000);
+    });
+</script>
+}
