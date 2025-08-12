@@ -1,0 +1,9 @@
+body { font-family: Arial, sans-serif; background: #f4f6fa; margin: 0; }
+nav { background: #003366; color: #fff; padding: 1rem; }
+nav a { color: #fff; margin-right: 1.5rem; text-decoration: none; font-weight: bold; }
+.container { max-width: 900px; margin: 2rem auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 2rem; }
+h1 { color: #003366; }
+.metrics { display: flex; gap: 2rem; margin-top: 2rem; }
+.metric { background: #e3eaf2; border-radius: 6px; padding: 1.5rem; flex: 1; text-align: center; }
+.metric-value { font-size: 2.5rem; font-weight: bold; color: #0077cc; }
+.metric-label { color: #333; font-size: 1.1rem; }
